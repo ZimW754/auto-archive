@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build app
+        run: ./build.sh
+
+      - name: Verify app
+        run: |
+          test -x "自动归档.app/Contents/MacOS/AutoArchive"
+          VERSION=$(plutil -extract CFBundleShortVersionString raw "自动归档.app/Contents/Info.plist")
+          test -n "$VERSION"
+          echo "Built version: $VERSION"
+
+      - name: Package app
+        run: |
+          VERSION=$(plutil -extract CFBundleShortVersionString raw "自动归档.app/Contents/Info.plist")
+          ZIP="AutoArchive-${VERSION}-macOS-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent "自动归档.app" "$ZIP"
+          shasum -a 256 "$ZIP" > "$ZIP.sha256"
+          cat "$ZIP.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AutoArchive-macOS-arm64
+          path: |
+            AutoArchive-*.zip
+            AutoArchive-*.sha256
+          if-no-files-found: error

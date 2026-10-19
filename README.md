@@ -304,3 +304,7 @@ clang -fobjc-arc -framework Cocoa -framework ImageIO -mmacosx-version-min=11.0 \
   -o /tmp/mkphotos tools/mkphotos.m
 /tmp/mkphotos --fixtures test-fixtures
 ```
+
+## 许可证
+
+MIT

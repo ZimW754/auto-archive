@@ -2,3 +2,5 @@
 *.app/
 *.zip
 build/
+
+tools/bin/
